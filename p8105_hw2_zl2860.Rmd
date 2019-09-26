@@ -1,0 +1,55 @@
+---
+title: "p8105_hw2_zl2860"
+author: "Zongchao Liu"
+date: "9/25/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readxl)
+```
+
+# Problem 1 
+
+```{r}
+trash_wheel <- read_excel("./dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = 1) %>%
+  janitor::clean_names() %>%
+  drop_na(dumpster) %>%
+  select(dumpster:homes_powered)
+
+trash_wheel["sports_balls"] <- as.integer(round(pull(trash_wheel,sports_balls))) # pay attention to the rules of round()!!
+
+prec_2018 <- read_excel("./dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = 3, skip = 1)%>%
+  janitor::clean_names()%>%
+  drop_na(month)%>%
+  select(-month)%>%
+  mutate( month = month.name,
+          year = 2018)%>%
+  drop_na(total)
+
+prec_2017 <- read_excel("./dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = 4, skip = 1)%>%
+  janitor::clean_names() %>%
+    drop_na(month) %>%
+    select(-month) %>%
+    mutate( month = month.name,
+          year = 2017) %>%
+    drop_na(total)%>%
+  
+combined_17_18 <- bind_rows(prec_2017,prec_2018) %>%
+  select(month, year, total)
+  
+  
+
+  
+
+
+
+  
+  
+
+
+```
+
+
