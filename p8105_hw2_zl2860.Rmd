@@ -35,7 +35,7 @@ prec_2017 <- read_excel("./dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
     select(-month) %>%
     mutate( month = month.name,
           year = 2017) %>%
-    drop_na(total)%>%
+    drop_na(total)
   
 combined_17_18 <- bind_rows(prec_2017,prec_2018) %>%
   select(month, year, total)
