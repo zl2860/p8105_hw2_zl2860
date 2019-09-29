@@ -138,7 +138,7 @@ male_rank
 ```
 
 ## scatter plot
-```{r fig.width=5}
+```{r fig.width=8}
 # create the dataframe for plotting
 male_white_NH_2016 <- Popular_Baby_Names %>%
   filter(gender == "male",
