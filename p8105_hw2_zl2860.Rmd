@@ -14,22 +14,23 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readxl)
-library(knitr)
+library(ggrepel)
 ```
 
 # Problem 1 
 
 ## read and clean the Mr. Trash Wheel sheet
-```{r message=FALSE}
+```{r message = FALSE}
 trash_wheel <- read_excel("./dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = 1) %>%
-  janitor::clean_names() %>%
-  drop_na(dumpster) %>%
-  select(dumpster:homes_powered) %>%
-  mutate(sports_balls = as.integer(round(sports_balls)))# round()???
+  janitor::clean_names() %>%  # adjust variable names
+  drop_na(dumpster) %>%  # omit rows that do not include dumpster-specific data
+  select(dumpster:homes_powered) %>% # omit non-data columns containing notes
+  mutate(sports_balls = as.integer(round(sports_balls))) # round & convert data type
 ```
 
 ## read and clean the precipitation data for 2018 sheet
-```{r}
+```{r message = FALSE }
+# clean the data
 prec_2018 <- read_excel("./dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = 3, skip = 1)%>%
   janitor::clean_names()%>%
   drop_na(month,total)%>%
@@ -37,7 +38,8 @@ prec_2018 <- read_excel("./dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
 ```
 
 ## read and clean the precipitation data for 2017 sheet
-```{r}
+```{r message = FALSE }
+#clean the data
 prec_2017 <- read_excel("./dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = 4, skip = 1)%>%
   janitor::clean_names() %>%
     drop_na(month,total) %>%
@@ -45,25 +47,31 @@ prec_2017 <- read_excel("./dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
 ```
 
 ## combine precipitation datasets and convert month to a character variable 
-```{r}
-combined_17_18 <- bind_rows(prec_2017,prec_2018) %>%
-  select(month, year, total) %>%
+```{r message = FALSE }
+# combine data 
+prec_17_18 <- bind_rows(prec_2017,prec_2018) %>%
+  select(month, year, total) %>% # arrange the order of the columns
   mutate(month = month.name[month]) 
 ```
-**Write a paragraph about these data; you are encouraged to use inline R. Be sure to note the number of observations in both resulting datasets, and give examples of key variables. For available data, what was the total precipitation in 2018? What was the median number of sports balls in a dumpster in 2017?**
 
-The total precipitation in 2018 was `r sum(pull(prec_2018, total ))` tons and the median number of sports balls in a dumpster in 2017 was `r trash_wheel %>% filter(year == 2017) %>% summarise(median = median(sports_balls))`
+### Data Interpretation
+
+The `trash_wheel` dataset includes general information on the dumpster number, date of collection, amount of total litter, litter type and the number of homes that are powered by collecting and processing trash. The `trash_wheel` dataset has `r nrow(trash_wheel) ` observations with 14 variables and the `prec_17_18` dataset with precipitation data in 2017 and 2018 has `r nrow(prec_17_18)` observations with `r ncol(prec_17_18)` variables. For the `trash_wheel` dataset, key variables are ``r names(trash_wheel)[-c(1:4)]``. These variables contain the most core information that should be taken into account when researchers raise a specific question. In contrast, variables like `r names(trash_wheel)[c(1:4)]`  do not contain very specific information like litter type or litter volume but serve as important roles for indexing and grouping data. When researchers put forward a question like " Is there any difference of the total litter weights among different years?", indexing and grouping in the dataset become necessary. Therefore, these variables are also important and cannot be dropped without any consideration. For the "combined_17_18" dataset, the principle is similar. The key variable is `r names(prec_17_18)[3]`. The `year` and `month` variables do not indicate the amount of trash but serve as unique index for each total value.
+
+The total precipitation in 2018 was `r sum(pull(prec_2018, total ))` and the median number of sports balls in a dumpster in 2017 was `r trash_wheel %>% filter(year == 2017) %>% summarise(median = median(sports_balls))`.
 
 
 # Promblem 2  
-## clean the data in "pols-month.csv"  
+## clean the data in "pols-month.csv" 
+
 ```{r message = FALSE}
 pols_month <- read_csv("./dataset/pols-month.csv") %>%
   separate(mon,
            c("year", "month", "day"),
            remove = TRUE) %>%
   mutate(month = month.abb[as.numeric(month)],
-         president = ifelse(prez_dem == "0","gop","dem")) %>%  ###这里会凉,0,1,2???
+         president = ifelse(prez_dem == "0","gop","dem")) %>%  
+  # Here if the the value of `prez_dem` is 2, we still treat it as 1
   select(-day, -prez_dem, -prez_gop)
 ```
 
@@ -81,20 +89,33 @@ snp <- read_csv("./dataset/snp.csv") %>%
 unemployment <- read_csv("./dataset/unemployment.csv") %>%
   pivot_longer( Jan:Dec,
                 names_to = "month",
-                values_to = "unemplm_percentage"
-  )%>%
-  mutate( year = as.character(Year))%>%
-  select(-Year) %>%
-  select(year, month, everything()) %>%
-  drop_na() # after pivot_longer(), 6 rows contain missing values
+                values_to = "percentage"
+  ) %>%
+  janitor::clean_names() %>%  # clean names only after the month names become values
+  mutate( year = as.character(year))%>%
+  select(year, month, everything())%>%
+  drop_na(percentage) # drop missing values
 ```
+
+The `percentage` is the key variable of the `unemployment` dataset. I dropped these rows with missing values of this variable because the content of the resulting merged dataset will not be changed even if I keep these rows in the original dataset.
 
 ## join the datasets
 ```{r}
 merged_problem2 <- full_join(full_join(pols_month,snp),unemployment)
+# To make sure all of the information is included, I used full_join() to merge the datasets
 
   
 ```
+
+## Data Interpretation
+
+The `pols_month` dataset has `r nrow(pols_month)` observations of `r ncol(pols_month)` variables and includes the information on the number of national politicians who are democratic or republican at any given time. 
+
+The `snp` dataset has `r nrow(snp)` observations of `r ncol(snp)` variables and includes the information on the closing values of the S&P stock index on the associated date. 
+
+The `unemployment` dataset has `r nrow(unemployment)` observations of `r ncol(unemployment)` varaibles and includes information on percentage of unemployment in each month of the associated year.
+
+The dimension of the resulting dataset `merged_problem2` is `r dim(merged_problem2)`. The range of years is from `r min(as.numeric(pull(merged_problem2,year)))` to `r max(as.numeric(pull(merged_problem2,year)))`. Key variables in this dataset are ``r names(merged_problem2)[-c(1:2)]``.
 
 # Problem 3 
 ## Load and tidy the data
@@ -119,7 +140,10 @@ changes_of_Olivia <- Popular_Baby_Names %>%
   select(ethnicity, rank, year_of_birth) %>%
   pivot_wider(names_from = year_of_birth,
               values_from = rank)%>%
-  knitr::kable()
+  knitr::kable(caption = paste("Table 2. ",
+                               str_to_title("the rank in popularity of the name Olivia from 2011 to 2016")
+                               )
+               )
 changes_of_Olivia
 ```
 
@@ -133,7 +157,10 @@ male_rank <- Popular_Baby_Names %>%
   select(ethnicity, year_of_birth, childs_first_name) %>%
   pivot_wider(names_from = year_of_birth ,
               values_from = childs_first_name)%>%
-  knitr::kable()
+  knitr::kable(caption=paste("Table 1. ",
+                              str_to_title("the most popular name among male children from 2011 to 2016")
+                              )
+               )
 male_rank
 ```
 
@@ -148,9 +175,12 @@ male_white_NH_2016 <- Popular_Baby_Names %>%
 #use ggplot to make a scatter plot
 male_white_NH_2016%>%
   ggplot(aes(x= rank, y = count)) +geom_point(
-   alpha = .4)+labs(x="Rank",y="Count", title = "The Number of Children with a Name Against the Rank in Popularity of That Name")+
+   alpha = .4)+labs(x="Rank",y="Count", 
+                    title = str_to_title("The Number of Male Children with a Name Against the Rank in Popularity of That Name"),
+                    subtitle = "for white non-hispanic, 2016" )+
   theme_light()+
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle =element_text(hjust = 0.5) )
   
 ```
 
