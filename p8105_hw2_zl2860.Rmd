@@ -97,7 +97,7 @@ unemployment <- read_csv("./dataset/unemployment.csv") %>%
   drop_na(percentage) # drop missing values
 ```
 
-The `percentage` is the key variable of the `unemployment` dataset. I dropped these rows with missing values of this variable because the content of the resulting merged dataset will not be changed even if I keep these rows in the original dataset.
+The `percentage` is the key variable of the `unemployment` dataset. I dropped these rows with missing values of this variable. The amount of the information in the resulting merged dataset will not be changed even if I keep these rows in the original dataset. 
 
 ## join the datasets
 ```{r}
