@@ -31,16 +31,16 @@ trash_wheel <- read_excel("./dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx
 ## read and clean the precipitation data for 2018 sheet
 ```{r message = FALSE }
 # clean the data
-prec_2018 <- read_excel("./dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = 3, skip = 1)%>%
-  janitor::clean_names()%>%
-  drop_na(month,total)%>%
+prec_2018 <- read_excel("./dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = 3, skip = 1) %>%
+  janitor::clean_names() %>%
+  drop_na(month,total) %>%
   mutate(year = 2018)
 ```
 
 ## read and clean the precipitation data for 2017 sheet
 ```{r message = FALSE }
 #clean the data
-prec_2017 <- read_excel("./dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = 4, skip = 1)%>%
+prec_2017 <- read_excel("./dataset/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = 4, skip = 1) %>%
   janitor::clean_names() %>%
     drop_na(month,total) %>%
     mutate(year = 2017)
@@ -56,7 +56,7 @@ prec_17_18 <- bind_rows(prec_2017,prec_2018) %>%
 
 ### Data Interpretation
 
-The `trash_wheel` dataset includes general information on the dumpster number, date of collection, amount of total litter, litter type and the number of homes that are powered by collecting and processing trash. The `trash_wheel` dataset has `r nrow(trash_wheel) ` observations with 14 variables and the `prec_17_18` dataset with precipitation data in 2017 and 2018 has `r nrow(prec_17_18)` observations with `r ncol(prec_17_18)` variables. For the `trash_wheel` dataset, key variables are ``r names(trash_wheel)[-c(1:4)]``. These variables contain the most core information that should be taken into account when researchers raise a specific question. In contrast, variables like `r names(trash_wheel)[c(1:4)]`  do not contain very specific information like litter type or litter volume but serve as important roles for indexing and grouping data. When researchers put forward a question like " Is there any difference of the total litter weights among different years?", indexing and grouping in the dataset become necessary. Therefore, these variables are also important and cannot be dropped without any consideration. For the "combined_17_18" dataset, the principle is similar. The key variable is `r names(prec_17_18)[3]`. The `year` and `month` variables do not indicate the amount of trash but serve as unique index for each total value.
+The `trash_wheel` dataset includes general information on the dumpster number, date of collection, amount of total litter, litter type and the number of homes that are powered by collecting and processing trash. The `trash_wheel` dataset has `r nrow(trash_wheel) ` observations of 14 variables and the `prec_17_18` dataset with precipitation data in 2017 and 2018 has `r nrow(prec_17_18)` observations of `r ncol(prec_17_18)` variables. For the `trash_wheel` dataset, key variables are ``r names(trash_wheel)[-c(1:4)]``. These variables contain the most core information that should be taken into account when researchers raise a specific question. In contrast, variables like ``r names(trash_wheel)[c(1:4)]``  do not contain very specific information like litter type or litter volume but serve as important roles for indexing and grouping data. When researchers put forward a question like " Is there any difference of the total litter weights among different years?", indexing and grouping in the dataset become necessary. Therefore, these variables are also important and cannot be dropped without any consideration. For the "combined_17_18" dataset, the principle is similar. The key variable is ``r names(prec_17_18)[3]``. The `year` and `month` variables do not indicate the amount of trash but serve as unique index for each total value.
 
 The total precipitation in 2018 was `r sum(pull(prec_2018, total ))` and the median number of sports balls in a dumpster in 2017 was `r trash_wheel %>% filter(year == 2017) %>% summarise(median = median(sports_balls))`.
 
@@ -75,12 +75,12 @@ pols_month <- read_csv("./dataset/pols-month.csv") %>%
   select(-day, -prez_dem, -prez_gop)
 ```
 
-## clean the Data in "snp.csv"
+## clean the data in "snp.csv"
 ```{r message=FALSE}
 snp <- read_csv("./dataset/snp.csv") %>%
   separate(date,
            c("month","day","year")) %>%
-  select(year,month,everything(),-day)%>%
+  select(year,month,everything(),-day) %>%
   mutate(month = month.abb[as.numeric(month)])
 ```
 
@@ -92,8 +92,8 @@ unemployment <- read_csv("./dataset/unemployment.csv") %>%
                 values_to = "percentage"
   ) %>%
   janitor::clean_names() %>%  # clean names only after the month names become values
-  mutate( year = as.character(year))%>%
-  select(year, month, everything())%>%
+  mutate( year = as.character(year)) %>%
+  select( year, month, everything()) %>%
   drop_na(percentage) # drop missing values
 ```
 
@@ -103,8 +103,6 @@ The `percentage` is the key variable of the `unemployment` dataset. I dropped th
 ```{r}
 merged_problem2 <- full_join(full_join(pols_month,snp),unemployment)
 # To make sure all of the information is included, I used full_join() to merge the datasets
-
-  
 ```
 
 ## Data Interpretation
@@ -115,7 +113,7 @@ The `snp` dataset has `r nrow(snp)` observations of `r ncol(snp)` variables and 
 
 The `unemployment` dataset has `r nrow(unemployment)` observations of `r ncol(unemployment)` varaibles and includes information on percentage of unemployment in each month of the associated year.
 
-The dimension of the resulting dataset `merged_problem2` is `r dim(merged_problem2)`. The range of years is from `r min(as.numeric(pull(merged_problem2,year)))` to `r max(as.numeric(pull(merged_problem2,year)))`. Key variables in this dataset are ``r names(merged_problem2)[-c(1:2)]``.
+The dimension of the resulting dataset `merged_problem2` is (`r dim(merged_problem2)`)(`r nrow(merged_problem2)` rows, `r ncol(merged_problem2)` columns). The range of years is from `r min(as.numeric(pull(merged_problem2,year)))` to `r max(as.numeric(pull(merged_problem2,year)))`. Key variables in this dataset are ``r names(merged_problem2)[-c(1:2)]``.
 
 # Problem 3 
 ## Load and tidy the data
@@ -128,7 +126,7 @@ Popular_Baby_Names <- read_csv("./dataset/Popular_Baby_Names.csv") %>%
                             "BLACK NON HISP" = "BLACK NON HISPANIC" ,
                             "WHITE NON HISP" = "WHITE NON HISPANIC"
                             )),
-         childs_first_name = str_to_title(childs_first_name) )%>%
+         childs_first_name = str_to_title(childs_first_name)) %>%
   distinct()
 ```
 
@@ -139,7 +137,7 @@ changes_of_Olivia <- Popular_Baby_Names %>%
   filter(childs_first_name == "Olivia") %>%
   select(ethnicity, rank, year_of_birth) %>%
   pivot_wider(names_from = year_of_birth,
-              values_from = rank)%>%
+              values_from = rank) %>%
   knitr::kable(caption = paste("Table 2. ",
                                str_to_title("the rank in popularity of the name Olivia from 2011 to 2016")
                                )
@@ -152,11 +150,11 @@ changes_of_Olivia
 # the similar table shows the most popular name among male children over time  
 male_rank <- Popular_Baby_Names %>%
   filter(gender == "male") %>%
-  group_by(ethnicity)%>%
+  group_by(ethnicity) %>%
   filter(rank == min(rank)) %>%
   select(ethnicity, year_of_birth, childs_first_name) %>%
   pivot_wider(names_from = year_of_birth ,
-              values_from = childs_first_name)%>%
+              values_from = childs_first_name) %>%
   knitr::kable(caption=paste("Table 1. ",
                               str_to_title("the most popular name among male children from 2011 to 2016")
                               )
@@ -172,8 +170,8 @@ male_white_NH_2016 <- Popular_Baby_Names %>%
          ethnicity == "white non hispanic",
          year_of_birth == 2016)
 
-#use ggplot to make a scatter plot
-male_white_NH_2016%>%
+#use ggplot2 to make a scatter plot
+male_white_NH_2016 %>%
   ggplot(aes(x= rank, y = count)) +geom_point(
    alpha = .4)+labs(x="Rank",y="Count", 
                     title = str_to_title("The Number of Male Children with a Name Against the Rank in Popularity of That Name"),
