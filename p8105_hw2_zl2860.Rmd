@@ -64,9 +64,11 @@ The total precipitation in 2018 was `r sum(pull(prec_2018, total ))` and the med
 pols_month <- read_csv("./dataset/pols-month.csv") %>%
   separate(mon,
            c("year", "month", "day"),
-           remove = TRUE) %>%
+           remove = TRUE
+           ) %>%
   mutate(month = month.abb[as.numeric(month)],
-         president = ifelse(prez_dem == "0","gop","dem")) %>%  
+         president = ifelse(prez_dem == "0","gop","dem")
+         ) %>%  
   # Here if the the value of `prez_dem` is 2, we still treat it as 1
   select(-day, -prez_dem, -prez_gop)
 ```
@@ -86,7 +88,7 @@ unemployment <- read_csv("./dataset/unemployment.csv") %>%
   pivot_longer( Jan:Dec,
                 names_to = "month",
                 values_to = "percentage"
-  ) %>%
+                ) %>%
   janitor::clean_names() %>%  # clean names only after the month names become values
   mutate( year = as.character(year)) %>%
   select( year, month, everything()) %>%
@@ -120,9 +122,9 @@ Popular_Baby_Names <- read_csv("./dataset/Popular_Baby_Names.csv") %>%
          ethnicity = str_to_lower(recode(ethnicity,
                             "ASIAN AND PACI" = "ASIAN AND PACIFIC ISLANDER",
                             "BLACK NON HISP" = "BLACK NON HISPANIC" ,
-                            "WHITE NON HISP" = "WHITE NON HISPANIC"
-                            )),
-         childs_first_name = str_to_title(childs_first_name)) %>%
+                            "WHITE NON HISP" = "WHITE NON HISPANIC")),
+         childs_first_name = str_to_title(childs_first_name)
+         ) %>%
   distinct() # remove duplicated rows
 ```
 
@@ -150,7 +152,8 @@ male_rank <- Popular_Baby_Names %>%
   filter(rank == min(rank)) %>%
   select(ethnicity, year_of_birth, childs_first_name) %>%
   pivot_wider(names_from = year_of_birth ,
-              values_from = childs_first_name) %>%
+              values_from = childs_first_name
+              ) %>%
   knitr::kable(caption=paste("Table 1. ",
                               str_to_title("the most popular name among male children from 2011 to 2016")
                               )
@@ -175,7 +178,7 @@ male_white_NH_2016 %>%
                     subtitle = "for white non-hispanic, 2016" ) +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5),
-        plot.subtitle =element_text(hjust = 0.5) )
+        plot.subtitle =element_text(hjust = 0.5))
   
 ```
 
